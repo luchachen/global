@@ -248,8 +248,8 @@ if !exists("g:Gtags_Close_When_Single")
 endif
 
 " -- ctags-x format 
-" let Gtags_Result = "ctags-x"
-" let Gtags_Efm = "%*\\S%*\\s%l%\\s%f%\\s%m"
+let Gtags_Result = "ctags-x"
+let Gtags_Efm = "%*\\S%*\\s%l%\\s%f%\\s%m"
 "
 " -- ctags format 
 " let Gtags_Result = "ctags"
@@ -450,8 +450,8 @@ function! s:ExecLoad(option, long_option, pattern, flags, curext)
     " Parse the output of 'global -x or -t' and show in the quickfix window.
     let l:efm_org = &efm
     let &efm = g:Gtags_Efm
-    if a:curext != ''
-        let l:result = substitute(l:result,'\S\+\s\+\d\+\s\(\S*\.' . a:curext . '\s\)\@![^\n]*\n', "", "g")
+    if a:curext == 'java' && a:pattern =~ '\snative\s'
+        let l:result = substitute(l:result,'\S\+\s\+\d\+\s\(\S*\.' . a:curext . '\s\)\@![^\n]*\n\+', "", "g")
     endif
     if a:flags =~# 'a'
         cadde l:result		" append mode
@@ -565,6 +565,7 @@ if g:Gtags_Auto_Map == 1
 	:nmap <F8> :Gozilla<CR>
 	:nmap <C-n> :cn<CR>
 	:nmap <C-p> :cp<CR>
-	:nmap <C-\><C-]> :GtagsCursor<CR>
+	":nmap <C-\><C-]> :GtagsCursor<CR>
+	:nmap <C-]> :GtagsCursor<CR>
 endif
 let loaded_gtags = 1
