@@ -248,8 +248,8 @@ if !exists("g:Gtags_Close_When_Single")
 endif
 
 " -- ctags-x format 
-" let Gtags_Result = "ctags-x"
-" let Gtags_Efm = "%*\\S%*\\s%l%\\s%f%\\s%m"
+let Gtags_Result = "ctags-x"
+let Gtags_Efm = "%*\\S%*\\s%l%\\s%f%\\s%m"
 "
 " -- ctags format 
 " let Gtags_Result = "ctags"
@@ -379,7 +379,7 @@ endfunction
 "
 " Execute global and load the result into quickfix window.
 "
-function! s:ExecLoad(option, long_option, pattern, flags)
+function! s:ExecLoad(option, long_option, pattern, flags, curext)
     " Execute global(1) command and write the result to a temporary file.
     let l:isfile = 0
     let l:option = ''
@@ -450,6 +450,9 @@ function! s:ExecLoad(option, long_option, pattern, flags)
     " Parse the output of 'global -x or -t' and show in the quickfix window.
     let l:efm_org = &efm
     let &efm = g:Gtags_Efm
+    if a:curext == 'java' && a:pattern =~ '\snative\s'
+        let l:result = substitute(l:result,'\S\+\s\+\d\+\s\(\S*\.' . a:curext . '\s\)\@![^\n]*\n\+', "", "g")
+    endif
     if a:flags =~# 'a'
         cadde l:result		" append mode
     elseif g:Gtags_No_Auto_Jump == 1
@@ -486,7 +489,8 @@ function! s:RunGlobal(line, flags)
             return
         endif
     endif
-    call s:ExecLoad(l:option, '', l:pattern, a:flags)
+    let l:curext = expand("%:e")
+    call s:ExecLoad(l:option, '', l:pattern, a:flags, l:curext)
 endfunction
 
 "
@@ -495,7 +499,8 @@ endfunction
 function! s:GtagsCursor()
     let l:pattern = expand("<cword>")
     let l:option = "--from-here=\"" . line('.') . ":" . expand("%") . "\""
-    call s:ExecLoad('', l:option, l:pattern, '')
+    let l:curext = expand("%:e")
+    call s:ExecLoad('', l:option, l:pattern, '', l:curext)
 endfunction
 
 "
@@ -560,6 +565,7 @@ if g:Gtags_Auto_Map == 1
 	:nmap <F8> :Gozilla<CR>
 	:nmap <C-n> :cn<CR>
 	:nmap <C-p> :cp<CR>
-	:nmap <C-\><C-]> :GtagsCursor<CR>
+	":nmap <C-\><C-]> :GtagsCursor<CR>
+	:nmap <C-]> :GtagsCursor<CR>
 endif
 let loaded_gtags = 1
